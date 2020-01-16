@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">AgentWebX5</string>
+    <string name="tip_activity_not_null">activity can not null</string>
+    <string name="text_camera">相机</string>
+    <string name="tip_create_file_fail">文件创建失败</string>
+    <string name="tip_create_dir_fail">文件夹创建失败</string>
+</resources>
