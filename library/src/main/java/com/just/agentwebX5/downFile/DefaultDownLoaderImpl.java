@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.text.TextUtils;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AlertDialog;
 import androidx.core.content.ContextCompat;
 
@@ -23,13 +24,17 @@ import com.just.agentwebX5.helpClass.AgentWebX5Config;
 import com.just.agentwebX5.permission.IPermissionRequestListener;
 import com.just.agentwebX5.util.AgentWebX5Utils;
 import com.just.agentwebX5.util.LogUtils;
+import com.permission.kit.OnPermissionListener;
+import com.permission.kit.PermissionKit;
 import com.tencent.smtt.sdk.DownloadListener;
 
 import java.io.File;
+import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Executor;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -43,25 +48,20 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- *
+ * 默认下载实现
  */
 
 public class DefaultDownLoaderImpl implements DownloadListener, DownLoadResultListener {
     private Context mContext;
     private boolean isForce;
     private boolean enableIndicator;
-    private volatile static int NoticationID = 1;
+    private int NotificationID = 1;
     private List<DownLoadResultListener> mDownLoadResultListeners;
     private WeakReference<Activity> mActivityWeakReference;
     private DownLoadMsgConfig mDownLoadMsgConfig;
     private static final String TAG = DefaultDownLoaderImpl.class.getSimpleName();
-    private IPermissionInterceptor mPermissionListener;
-    private String url;
-    private String contentDisposition;
-    private long contentLength;
     private AtomicBoolean isParallelDownload = new AtomicBoolean(false);
     private int icon;
-
 
     private DefaultDownLoaderImpl(Builder builder) {
         mActivityWeakReference = new WeakReference<>(builder.mActivity);
@@ -70,108 +70,63 @@ public class DefaultDownLoaderImpl implements DownloadListener, DownLoadResultLi
         this.enableIndicator = builder.enableIndicator;
         this.mDownLoadResultListeners = builder.mDownLoadResultListeners;
         this.mDownLoadMsgConfig = builder.mDownLoadMsgConfig;
-        this.mPermissionListener = builder.mPermissionInterceptor;
         isParallelDownload.set(builder.isParallelDownload);
         icon = builder.icon;
-
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     @Override
-    public synchronized void onDownloadStart(String url, String userAgent, String contentDisposition, String mimetype, long contentLength) {
-        LogUtils.getInstance().e(TAG, "disposition" + contentDisposition);
-        onDownloadStartInternal(url, contentDisposition, mimetype, contentLength);
-    }
-
-    private void onDownloadStartInternal(String url, String contentDisposition, String mimetype, long contentLength) {
-        if (mActivityWeakReference.get() == null || mActivityWeakReference.get().isFinishing()) {
-            return;
-        }
-        LogUtils.getInstance().e(TAG, "mime:" + mimetype);
-        if (this.mPermissionListener != null) {
-            if (this.mPermissionListener.intercept(url, PermissionConstant.STORAGE, "download")) {
-                return;
-            }
-        }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (checkNeedPermission().isEmpty()) {
-                preDownload(url, contentDisposition, contentLength);
-            } else {
-                ActionActivity.setPermissionListener(getPermissionListener());
-                this.url = url;
-                this.contentDisposition = contentDisposition;
-                this.contentLength = contentLength;
-                ActionActivity.start(mActivityWeakReference.get(), AgentWebX5Config.ACTION_PERMISSION, 0, PermissionConstant.STORAGE);
-            }
-        } else {
-            preDownload(url, contentDisposition, contentLength);
-        }
-    }
-
-    private IPermissionRequestListener getPermissionListener() {
-        return new IPermissionRequestListener() {
+    public synchronized void onDownloadStart(final String url, String userAgent, final String contentDisposition, String mimeType, final long contentLength) {
+        PermissionKit.getInstance().requestPermission(mActivityWeakReference.get(), 52 >> 6, new OnPermissionListener() {
             @Override
-            public void onRequestPermissionsResult(@NonNull String[] permissions, @NonNull int[] grantResults, Bundle extras) {
-                if (checkNeedPermission().isEmpty()) {
-                    preDownload(DefaultDownLoaderImpl.this.url, DefaultDownLoaderImpl.this.contentDisposition, DefaultDownLoaderImpl.this.contentLength);
-                    url = null;
-                    contentDisposition = null;
-                    contentLength = -1;
-                } else {
-                    LogUtils.getInstance().e(TAG, "储存权限获取失败~");
-                }
-
+            public void onSuccess(int requestCode, String... permissions) {
+                preDownload(url, contentDisposition, contentLength);
             }
-        };
+
+            @Override
+            public void onFail(int requestCode, String... permissions) {
+                //授权失败后再次操作
+                PermissionKit.getInstance().guideSetting(mActivityWeakReference.get(), true, requestCode, null, permissions);
+            }
+        }, PermissionConstant.STORAGE);
     }
 
-    private List<String> checkNeedPermission() {
-        List<String> deniedPermissions = new ArrayList<>();
-        for (int i = 0; i < PermissionConstant.STORAGE.length; i++) {
-            if (ContextCompat.checkSelfPermission(mActivityWeakReference.get(), PermissionConstant.STORAGE[i]) != PackageManager.PERMISSION_GRANTED) {
-                deniedPermissions.add(PermissionConstant.STORAGE[i]);
-            }
-        }
-        return deniedPermissions;
-    }
-
+    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     private void preDownload(String url, String contentDisposition, long contentLength) {
         File mFile = getFile(contentDisposition, url);
-        if (mFile == null)
+        if (mFile == null) {
             return;
-        if (mFile.exists() && mFile.length() >= contentLength) {
-
-            Intent mIntent = AgentWebX5Utils.getCommonFileIntent(mContext, mFile);
-            try {
-                if (mIntent != null) {
-                    if (!(mContext instanceof Activity))
-                        mIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    mContext.startActivity(mIntent);
-                }
-                return;
-            } catch (Throwable throwable) {
-                throwable.printStackTrace();
-            }
-
         }
-
-
+        if (mFile.exists() && mFile.length() >= contentLength) {
+            Intent mIntent = AgentWebX5Utils.getCommonFileIntent(mContext, mFile);
+            if (mIntent != null) {
+                if (!(mContext instanceof Activity)) {
+                    mIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                }
+                mContext.startActivity(mIntent);
+            }
+            return;
+        }
         if (ExecuteTasksMap.getInstance().contains(url)) {
             AgentWebX5Utils.toastShowShort(mContext, mDownLoadMsgConfig.getTaskHasBeenExist());
             return;
         }
-
-
         if (AgentWebX5Utils.checkNetworkType(mContext) > 1) { //移动数据
-
             showDialog(url, contentLength, mFile);
             return;
         }
         performDownload(url, contentLength, mFile);
     }
 
-    private void forceDown(final String url, final long contentLength, final File file) {
-        isForce = true;
-        performDownload(url, contentLength, file);
+    private void performDownload(String url, long contentLength, File file) {
+        ExecuteTasksMap.getInstance().addTask(url, file.getAbsolutePath());
+        //并行下载.
+        if (isParallelDownload.get()) {
+            new RealDownLoader(new DownLoadTask(NotificationID++, url, this, isForce, enableIndicator, mContext, file, contentLength, mDownLoadMsgConfig, icon == -1 ? R.mipmap.download : icon)).executeOnExecutor(ExecutorProvider.getInstance().provide(), (Void[]) null);
+        } else {
+            //默认串行下载.
+            new RealDownLoader(new DownLoadTask(NotificationID++, url, this, isForce, enableIndicator, mContext, file, contentLength, mDownLoadMsgConfig, icon == -1 ? R.mipmap.download : icon)).execute();
+        }
     }
 
     private void showDialog(final String url, final long contentLength, final File file) {
@@ -180,71 +135,48 @@ public class DefaultDownLoaderImpl implements DownloadListener, DownLoadResultLi
             return;
         }
         AlertDialog mAlertDialog;
-        mAlertDialog = new AlertDialog.Builder(mActivity)//
-                .setTitle(mDownLoadMsgConfig.getTips())//
-                .setMessage(mDownLoadMsgConfig.getHoneycomblow())//
+        mAlertDialog = new AlertDialog.Builder(mActivity)
+                .setTitle(mDownLoadMsgConfig.getTips())
+                .setMessage(mDownLoadMsgConfig.getHoneycomblow())
                 .setNegativeButton(mDownLoadMsgConfig.getDownLoad(), new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        if (dialog != null)
-                            dialog.dismiss();
-                        forceDown(url, contentLength, file);
+                        dialog.dismiss();
+                        isForce = true;
+                        performDownload(url, contentLength, file);
                     }
-                })//
+                })
                 .setPositiveButton(mDownLoadMsgConfig.getCancel(), new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-
-                        if (dialog != null)
-                            dialog.dismiss();
+                        dialog.dismiss();
                     }
                 }).create();
         mAlertDialog.show();
     }
 
-    private void performDownload(String url, long contentLength, File file) {
-        ExecuteTasksMap.getInstance().addTask(url, file.getAbsolutePath());
-        //并行下载.
-        if (isParallelDownload.get()) {
-            new RealDownLoader(new DownLoadTask(NoticationID++, url, this, isForce, enableIndicator, mContext, file, contentLength, mDownLoadMsgConfig, icon == -1 ? R.mipmap.download : icon)).executeOnExecutor(ExecutorProvider.getInstance().provide(), (Void[]) null);
-        } else {
-            //默认串行下载.
-            new RealDownLoader(new DownLoadTask(NoticationID++, url, this, isForce, enableIndicator, mContext, file, contentLength, mDownLoadMsgConfig, icon == -1 ? R.mipmap.download : icon)).execute();
-        }
-    }
-
-
+    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     private File getFile(String contentDisposition, String url) {
-        try {
-            String fileName = getFileName(contentDisposition);
-            if (TextUtils.isEmpty(fileName) && !TextUtils.isEmpty(url)) {
-                Uri mUri = Uri.parse(url);
-                fileName = mUri.getPath().substring(mUri.getPath().lastIndexOf('/') + 1);
-            }
-            if (!TextUtils.isEmpty(fileName) && fileName.length() > 64) {
-                fileName = fileName.substring(fileName.length() - 64);
-            }
-            if (TextUtils.isEmpty(fileName)) {
-                fileName = AgentWebX5Utils.md5(url);
-            }
-            return AgentWebX5Utils.createFileByName(mContext, fileName);
-        } catch (Throwable e) {
-            e.printStackTrace();
+        String fileName = null;
+        Matcher m = Pattern.compile(".*filename=(.*)").matcher(contentDisposition.toLowerCase());
+        if (m.find()) {
+            fileName = m.group(1);
         }
-
-        return null;
-    }
-
-    private String getFileName(String contentDisposition) {
-        if (TextUtils.isEmpty(contentDisposition)) {
+        if (TextUtils.isEmpty(fileName) && !TextUtils.isEmpty(url)) {
+            Uri mUri = Uri.parse(url);
+            fileName = Objects.requireNonNull(mUri.getPath()).substring(mUri.getPath().lastIndexOf('/') + 1);
+        }
+        if (!TextUtils.isEmpty(fileName) && fileName.length() > 64) {
+            fileName = fileName.substring(fileName.length() - 64);
+        }
+        if (TextUtils.isEmpty(fileName)) {
+            fileName = AgentWebX5Utils.md5(url);
+        }
+        try {
+            return AgentWebX5Utils.createFileByName(mContext, fileName);
+        } catch (IOException e) {
+            e.printStackTrace();
             return null;
-        } else {
-            Matcher m = Pattern.compile(".*filename=(.*)").matcher(contentDisposition.toLowerCase());
-            if (m.find()) {
-                return m.group(1);
-            } else {
-                return null;
-            }
         }
     }
 
@@ -347,8 +279,6 @@ public class DefaultDownLoaderImpl implements DownloadListener, DownLoadResultLi
         private static ExecuteTasksMap sInstance = null;
 
         static ExecuteTasksMap getInstance() {
-
-
             if (sInstance == null) {
                 synchronized (ExecuteTasksMap.class) {
                     if (sInstance == null)
@@ -359,7 +289,6 @@ public class DefaultDownLoaderImpl implements DownloadListener, DownLoadResultLi
         }
 
         void removeTask(String path) {
-
             int index = mTasks.indexOf(path);
             if (index == -1)
                 return;
@@ -373,7 +302,6 @@ public class DefaultDownLoaderImpl implements DownloadListener, DownLoadResultLi
             } finally {
                 unlock();
             }
-
         }
 
         void addTask(String url, String path) {

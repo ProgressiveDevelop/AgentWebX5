@@ -60,7 +60,12 @@ public class AgentWebX5 {
     /**
      * 下载监听器
      */
-    private DownloadListener mDownloadListener = null;
+    private DownloadListener downloadListener = null;
+
+    public DownloadListener getDownloadListener() {
+        return downloadListener;
+    }
+
     private IWebSecurityController<IWebSecurityCheckLogic> mWebSecurityController;
     private IWebSecurityCheckLogic mWebSecurityCheckLogic = null;
     private WebChromeClient mTargetChromeClient;
@@ -264,7 +269,7 @@ public class AgentWebX5 {
         if (mJavaObjects != null && !mJavaObjects.isEmpty()) {
             mJsInterfaceHolder.addJavaObjects(mJavaObjects);
         }
-        mWebListenerManager.setDownLoader(mWebCreator.get(), getLoadListener());
+        mWebListenerManager.setDownLoader(mWebCreator.get(), getDownloadListener());
         //设置默认WebChromeClient
         mWebListenerManager.setWebChromeClient(mWebCreator.get(), getChromeClient());
         //设置默认WebViewClient
@@ -286,10 +291,11 @@ public class AgentWebX5 {
         return this;
     }
 
+    //设置下载监听器
     private void setDownloadListener(List<DownLoadResultListener> downLoadResultListeners, boolean isParallelDl, int icon) {
-        DownloadListener mDownloadListener = this.mDownloadListener;
-        if (mDownloadListener == null) {
-            this.mDownloadListener = new DefaultDownLoaderImpl.Builder().setActivity(mActivity)
+        if (downloadListener == null) {
+            downloadListener = new DefaultDownLoaderImpl.Builder()
+                    .setActivity(mActivity)
                     .setEnableIndicator(true)//
                     .setForce(false)//
                     .setDownLoadResultListeners(downLoadResultListeners)//
@@ -299,10 +305,6 @@ public class AgentWebX5 {
                     .setIcon(icon)
                     .create();
         }
-    }
-
-    private DownloadListener getLoadListener() {
-        return this.mDownloadListener;
     }
 
     private WebChromeClient getChromeClient() {

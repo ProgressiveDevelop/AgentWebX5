@@ -18,6 +18,8 @@ import com.tencent.smtt.sdk.ValueCallback;
 
 public class AgentWebX5Config {
     public static final String[] MEDIAS = new String[]{"相机", "文件选择器"};
+    //取消通知
+    public static final String NOTIFICATION_CANCEL_ACTION = "notification_cancel_action";
     private static final String AGENTWEB_CACHE_PATCH = "/agentweb_cache";
     public static final String FILE_CACHE_PATH = "web_cache";
     public static final int WEBVIEW_DEFAULT_TYPE = 1;

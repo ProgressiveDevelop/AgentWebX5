@@ -16,7 +16,7 @@ public class DownLoadMsgConfig implements Parcelable {
     private String mLoading = "当前进度:%s";
     private String mTrickter = "您有一条新通知";
     private String mFileDownLoad = "文件下载";
-    private String mClickOpen = "点击打开";
+    private String mClickOpen = "下载完成，点击打开文件";
     private String preLoading = "即将开始下载文件";
 
     public String getPreLoading() {

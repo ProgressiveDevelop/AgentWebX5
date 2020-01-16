@@ -45,29 +45,34 @@ public class JsAccessImpl implements IJsAccess {
     public void callJs(final String js, final ValueCallback<String> callback) {
         LogUtils.getInstance().e(TAG, "js:" + js);
         if (Thread.currentThread() != Looper.getMainLooper().getThread()) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-                LogUtils.getInstance().e(TAG, "evaluateJs：" + js);
-                mWebView.evaluateJavascript(js, new com.tencent.smtt.sdk.ValueCallback<String>() {
-                    @Override
-                    public void onReceiveValue(String value) {
-                        LogUtils.getInstance().e(TAG, "onReceiveValue：" + value);
-                        if (callback != null)
-                            callback.onReceiveValue(value);
-                    }
-                });
-            } else {
-                LogUtils.getInstance().e(TAG, "loadJs：" + js);
-                mWebView.loadUrl(js);
-            }
+            executeFunction(js, callback);
         } else {
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    callJs(js, callback);
+                    executeFunction(js, callback);
                 }
             });
         }
 
+    }
+
+    private void executeFunction(String js, final ValueCallback<String> callback) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            LogUtils.getInstance().e(TAG, "evaluateJs：" + js);
+            mWebView.evaluateJavascript(js, new com.tencent.smtt.sdk.ValueCallback<String>() {
+                @Override
+                public void onReceiveValue(String value) {
+                    LogUtils.getInstance().e(TAG, "onReceiveValue：" + value);
+                    if (callback != null) {
+                        callback.onReceiveValue(value);
+                    }
+                }
+            });
+        } else {
+            LogUtils.getInstance().e(TAG, "loadJs：" + js);
+            mWebView.loadUrl(js);
+        }
     }
 
     /**

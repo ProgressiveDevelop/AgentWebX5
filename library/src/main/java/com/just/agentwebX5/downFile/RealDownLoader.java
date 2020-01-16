@@ -7,7 +7,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.text.TextUtils;
+import android.widget.Toast;
 
+import com.just.agentwebX5.helpClass.AgentWebX5Config;
 import com.just.agentwebX5.util.AgentWebX5Utils;
 import com.just.agentwebX5.util.LogUtils;
 import com.just.agentwebX5.R;
@@ -28,7 +30,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 
 /**
- * source code  https://github.com/Justson/AgentWeb
+ * 下载文件异步任务
  */
 
 public class RealDownLoader extends AsyncTask<Void, Integer, Integer> implements Observer {
@@ -38,7 +40,7 @@ public class RealDownLoader extends AsyncTask<Void, Integer, Integer> implements
     private long tmp = 0;
     private Exception e;
     private static final int TIME_OUT = 30000000;
-    private Notify mNotify;
+    private NotifyManager mNotify;
     private static final int ERROR_LOAD = 406;
     private static final String TAG = RealDownLoader.class.getSimpleName();
     private AtomicBoolean atomic = new AtomicBoolean(false);
@@ -49,15 +51,9 @@ public class RealDownLoader extends AsyncTask<Void, Integer, Integer> implements
         }
     };
 
-
     public RealDownLoader(DownLoadTask downLoadTask) {
         this.mDownLoadTask = downLoadTask;
         this.totals = mDownLoadTask.getLength();
-        checkNullTask(downLoadTask);
-    }
-
-    private void checkNullTask(DownLoadTask downLoadTask) {
-        LogUtils.getInstance().e("Notify", "TAG:" + downLoadTask.getDrawableRes());
         if (downLoadTask.getDrawableRes() == -1 || downLoadTask.getDrawableRes() == 0) {
             downLoadTask.setDrawableRes(R.mipmap.download);
         }
@@ -66,10 +62,43 @@ public class RealDownLoader extends AsyncTask<Void, Integer, Integer> implements
     @Override
     protected void onPreExecute() {
         super.onPreExecute();
+        //添加观察者
         mObservable.addObserver(this);
-        buildNotify(new Intent(), mDownLoadTask.getId(), mDownLoadTask.getDownLoadMsgConfig().getPreLoading());
+        Context mContext = mDownLoadTask.getContext().getApplicationContext();
+        if (mContext != null && mDownLoadTask.isEnableIndicator()) {
+            Toast.makeText(mContext, mContext.getResources().getString(R.string.tip_start_down), Toast.LENGTH_LONG).show();
+            Intent intent = new Intent();
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            int id = mDownLoadTask.getId();
+            PendingIntent rightPendIntent = PendingIntent.getActivity(mContext,
+                    0x33 * id, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+            int smallIcon = mDownLoadTask.getDrawableRes();
+            String ticker = mDownLoadTask.getDownLoadMsgConfig().getTrickter();
+            mNotify = new NotifyManager(mContext, id);
+            mNotify.notify_progress(rightPendIntent, smallIcon, ticker, mDownLoadTask.getDownLoadMsgConfig().getFileDownLoad(), mDownLoadTask.getDownLoadMsgConfig().getPreLoading(), false, false, false, buildCancelContent(mContext, id));
+            mNotify.sent();
+        }
     }
 
+    @Override
+    protected Integer doInBackground(Void... params) {
+        int result = ERROR_LOAD;
+        try {
+            if (!checkDownLoaderCondition()) {
+                return DownLoadMsg.STORAGE_ERROR.CODE;
+            }
+            if (!checkNet()) {
+                return DownLoadMsg.NETWORK_ERROR_CONNECTION.CODE;
+            }
+            result = doDownLoad();
+        } catch (Exception e) {
+            this.e = e;
+            LogUtils.getInstance().e(TAG, "doInBackground   Exception:" + e.getMessage());
+        }
+        return result;
+    }
+
+    //检查下载空间
     private boolean checkDownLoaderCondition() {
         if (mDownLoadTask.getLength() - mDownLoadTask.getFile().length() > AgentWebX5Utils.getAvailableStorage()) {
             LogUtils.getInstance().e(TAG, " 空间不足");
@@ -78,7 +107,8 @@ public class RealDownLoader extends AsyncTask<Void, Integer, Integer> implements
         return true;
     }
 
-    private boolean checknet() {
+    //检查网络
+    private boolean checkNet() {
         if (!mDownLoadTask.isForce()) {
             return AgentWebX5Utils.checkWifi(mDownLoadTask.getContext());
         } else {
@@ -86,46 +116,54 @@ public class RealDownLoader extends AsyncTask<Void, Integer, Integer> implements
         }
     }
 
-
-    @Override
-    protected Integer doInBackground(Void... params) {
-        int result = ERROR_LOAD;
-        try {
-            if (!checkDownLoaderCondition())
-                return DownLoadMsg.STORAGE_ERROR.CODE;
-            if (!checknet())
-                return DownLoadMsg.NETWORK_ERROR_CONNECTION.CODE;
-            result = doDownLoad();
-        } catch (Exception e) {
-            this.e = e;//发布
-            LogUtils.getInstance().e(TAG, "doInBackground   Exception:" + e.getMessage());
-        }
-        return result;
-    }
-
+    /**
+     * 开始下载
+     */
     private int doDownLoad() throws IOException {
-        HttpURLConnection mHttpURLConnection = createUrlConnection(mDownLoadTask.getUrl());
+        HttpURLConnection mHttpURLConnection = (HttpURLConnection) new URL(mDownLoadTask.getUrl()).openConnection();
+        mHttpURLConnection.setRequestProperty("Accept", "application/*");
+        mHttpURLConnection.setConnectTimeout(5000 * 2);
         if (mDownLoadTask.getFile().length() > 0) {
             mHttpURLConnection.addRequestProperty("Range", "bytes=" + (tmp = mDownLoadTask.getFile().length()) + "-");
         }
+        BufferedInputStream bis = null;
+        LoadingRandomAccessFile out = null;
         try {
             mHttpURLConnection.connect();
             if (mHttpURLConnection.getResponseCode() != 200 && mHttpURLConnection.getResponseCode() != 206) {
                 return DownLoadMsg.NETWORK_ERROR_STATUS_CODE.CODE;
+            } else {
+                InputStream in = mHttpURLConnection.getInputStream();
+                out = new LoadingRandomAccessFile(mDownLoadTask.getFile());
+                byte[] buffer = new byte[10240];
+                bis = new BufferedInputStream(in, 1024 * 10);
+                out.seek(out.length());
+                long previousBlockTime = -1;
+                while (!atomic.get()) {
+                    int n = bis.read(buffer, 0, 1024 * 10);
+                    if (n == -1) {
+                        break;
+                    }
+                    out.write(buffer, 0, n);
+                    if (!checkNet()) {
+                        return DownLoadMsg.NETWORK_ERROR_CONNECTION.CODE;
+                    }
+                    if (previousBlockTime == -1) {
+                        previousBlockTime = System.currentTimeMillis();
+                    } else if ((System.currentTimeMillis() - previousBlockTime) > TIME_OUT) {
+                        return DownLoadMsg.TIME_OUT.CODE;
+                    }
+                }
+                if (atomic.get()) {
+                    return DownLoadMsg.USER_CANCEL.CODE;
+                }
+                return DownLoadMsg.SUCCESSFULL.CODE;
             }
-            return doDownLoad(mHttpURLConnection.getInputStream(), new LoadingRandomAccessFile(mDownLoadTask.getFile()));
         } finally {
-            if (mHttpURLConnection != null) {
-                mHttpURLConnection.disconnect();
-            }
+            mHttpURLConnection.disconnect();
+            AgentWebX5Utils.closeIO(out);
+            AgentWebX5Utils.closeIO(bis);
         }
-    }
-
-    private HttpURLConnection createUrlConnection(String url) throws IOException {
-        HttpURLConnection mHttpURLConnection = (HttpURLConnection) new URL(url).openConnection();
-        mHttpURLConnection.setRequestProperty("Accept", "application/*");
-        mHttpURLConnection.setConnectTimeout(5000 * 2);
-        return mHttpURLConnection;
     }
 
     private long time = 0;
@@ -137,9 +175,9 @@ public class RealDownLoader extends AsyncTask<Void, Integer, Integer> implements
             if (mNotify != null && c - time > 800) {
                 time = c;
                 if (!mNotify.hasDeleteContent()) {
-                    mNotify.setDelecte(buildCancelContent(mDownLoadTask.getContext().getApplicationContext(), mDownLoadTask.getId()));
+                    mNotify.setDelete(buildCancelContent(mDownLoadTask.getContext().getApplicationContext(), mDownLoadTask.getId()));
                 }
-                int mProgress = (int) ((tmp + loaded) / Float.valueOf(totals) * 100);
+                int mProgress = (int) ((tmp + loaded) / (float) totals * 100);
                 mNotify.setContentText(String.format(mDownLoadTask.getDownLoadMsgConfig().getLoading(), mProgress + "%"));
                 mNotify.setProgress(100, mProgress, false);
             }
@@ -148,125 +186,51 @@ public class RealDownLoader extends AsyncTask<Void, Integer, Integer> implements
         }
     }
 
-    @Override
-    protected void onPostExecute(Integer integer) {
-        try {
-            LogUtils.getInstance().e(TAG, "onPostExecute:" + integer);
-            mObservable.deleteObserver(this);
-            doCallback(integer);
-            if (integer > 200) {
-                if (mNotify != null) {
-                    mNotify.cancel(mDownLoadTask.getId());
-                }
-                return;
-            }
-            if (mDownLoadTask.isEnableIndicator()) {
-                if (mNotify != null)
-                    mNotify.cancel(mDownLoadTask.getId());
-                Intent mIntent = AgentWebX5Utils.getCommonFileIntent(mDownLoadTask.getContext(), mDownLoadTask.getFile());
-                try {
-                    if (mIntent != null) {
-                        if (!(mDownLoadTask.getContext() instanceof Activity)) {
-                            mIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                        }
-                        PendingIntent rightPendIntent = PendingIntent.getActivity(mDownLoadTask.getContext(),
-                                mDownLoadTask.getId() << 4, mIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-                        mNotify.setProgressFinish(mDownLoadTask.getDownLoadMsgConfig().getClickOpen(), rightPendIntent);
-                    }
-                } catch (Throwable throwable) {
-                    throwable.printStackTrace();
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            LogUtils.getInstance().e(TAG, "e:" + e.getMessage());
-        }
-    }
-
-    private void doCallback(Integer code) {
-        DownLoadResultListener mDownLoadResultListener = null;
-        if ((mDownLoadResultListener = mDownLoadTask.getDownLoadResultListener()) == null) {
-            LogUtils.getInstance().e(TAG, "DownLoadResultListener has been death");
-            DefaultDownLoaderImpl.ExecuteTasksMap.getInstance().removeTask(mDownLoadTask.getFile().getPath());
-            return;
-        }
-        if (code > 200) {
-            mDownLoadResultListener.error(mDownLoadTask.getFile().getAbsolutePath(), mDownLoadTask.getUrl(), DownLoadMsg.getMsgByCode(code), this.e == null ? new RuntimeException("download fail ， cause:" + DownLoadMsg.getMsgByCode(code)) : this.e);
-        } else {
-            mDownLoadResultListener.success(mDownLoadTask.getFile().getPath());
-        }
-    }
-
-
-    private void buildNotify(Intent intent, int id, String progressHint) {
-        Context mContext = mDownLoadTask.getContext().getApplicationContext();
-        if (mContext != null && mDownLoadTask.isEnableIndicator()) {
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            PendingIntent rightPendIntent = PendingIntent.getActivity(mContext,
-                    0x33 * id, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-            int smallIcon = mDownLoadTask.getDrawableRes();
-            String ticker = mDownLoadTask.getDownLoadMsgConfig().getTrickter();
-            mNotify = new Notify(mContext, id);
-            mNotify.notify_progress(rightPendIntent, smallIcon, ticker, mDownLoadTask.getDownLoadMsgConfig().getFileDownLoad(), progressHint, false, false, false, buildCancelContent(mContext, id));
-            mNotify.sent();
-        }
-    }
-
-
     private PendingIntent buildCancelContent(Context context, int id) {
         Intent intentCancel = new Intent(context, NotificationBroadcastReceiver.class);
-        intentCancel.setAction("com.agentweb.cancelled");
-        intentCancel.putExtra("type", "type");
-        intentCancel.putExtra("TAG", mDownLoadTask.getUrl());
-        PendingIntent pendingIntentCancel = PendingIntent.getBroadcast(context, id << 3, intentCancel, PendingIntent.FLAG_UPDATE_CURRENT);
-        LogUtils.getInstance().e(TAG, "id<<3:" + (id << 3));
-        return pendingIntentCancel;
+        intentCancel.setAction(AgentWebX5Config.NOTIFICATION_CANCEL_ACTION);
+        intentCancel.putExtra("taskUrl", mDownLoadTask.getUrl());
+        return PendingIntent.getBroadcast(context, id << 3, intentCancel, PendingIntent.FLAG_UPDATE_CURRENT);
     }
 
-
-    private int doDownLoad(InputStream in, RandomAccessFile out) throws IOException {
-        byte[] buffer = new byte[10240];
-        BufferedInputStream bis = new BufferedInputStream(in, 1024 * 10);
-        try {
-            out.seek(out.length());
-            long previousBlockTime = -1;
-            while (!atomic.get()) {
-                int n = bis.read(buffer, 0, 1024 * 10);
-                if (n == -1) {
-                    break;
-                }
-                out.write(buffer, 0, n);
-                if (!checknet()) {
-                    LogUtils.getInstance().e(TAG, "network");
-                    return DownLoadMsg.NETWORK_ERROR_CONNECTION.CODE;
-                }
-                if (previousBlockTime == -1) {
-                    previousBlockTime = System.currentTimeMillis();
-                } else if ((System.currentTimeMillis() - previousBlockTime) > TIME_OUT) {
-                    LogUtils.getInstance().e(TAG, "timeout");
-                    return DownLoadMsg.TIME_OUT.CODE;
+    @Override
+    protected void onPostExecute(Integer integer) {
+        LogUtils.getInstance().e(TAG, "onPostExecute:" + integer);
+        //删除观察
+        mObservable.deleteObserver(this);
+        if (mNotify != null) {
+            mNotify.cancelById(mDownLoadTask.getId());
+        }
+        DownLoadResultListener mDownLoadResultListener = mDownLoadTask.getDownLoadResultListener();
+        if (mDownLoadResultListener == null) {
+            DefaultDownLoaderImpl.ExecuteTasksMap.getInstance().removeTask(mDownLoadTask.getFile().getPath());
+        } else {
+            if (integer > 200) {
+                mDownLoadResultListener.error(mDownLoadTask.getFile().getAbsolutePath(), mDownLoadTask.getUrl(), DownLoadMsg.getMsgByCode(integer), this.e == null ? new RuntimeException("download fail ， cause:" + DownLoadMsg.getMsgByCode(integer)) : this.e);
+            } else {
+                Toast.makeText(mDownLoadTask.getContext(), mDownLoadTask.getContext().getResources().getString(R.string.tip_completed_down), Toast.LENGTH_LONG).show();
+                mDownLoadResultListener.success(mDownLoadTask.getFile().getPath());
+            }
+            if (mDownLoadTask.isEnableIndicator()) {
+                Intent mIntent = AgentWebX5Utils.getCommonFileIntent(mDownLoadTask.getContext(), mDownLoadTask.getFile());
+                if (mIntent != null) {
+                    if (!(mDownLoadTask.getContext() instanceof Activity)) {
+                        mIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    }
+                    PendingIntent rightPendIntent = PendingIntent.getActivity(mDownLoadTask.getContext(),
+                            mDownLoadTask.getId() << 4, mIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+                    mNotify.setProgressFinish(mDownLoadTask.getDownLoadMsgConfig().getClickOpen(), rightPendIntent);
                 }
             }
-            LogUtils.getInstance().e(TAG, "atomic:" + atomic.get());
-            if (atomic.get()) {
-                return DownLoadMsg.USER_CANCEL.CODE;
-            }
-            return DownLoadMsg.SUCCESSFULL.CODE;
-        } finally {
-            AgentWebX5Utils.closeIO(out);
-            AgentWebX5Utils.closeIO(bis);
         }
     }
 
-    private void toCancel() {
-        atomic.set(true);
-    }
-
+    //观察改变
     @Override
     public void update(Observable o, Object arg) {
         String url;
         if (arg instanceof String && !TextUtils.isEmpty(url = (String) arg) && url.equals(mDownLoadTask.getUrl())) {
-            toCancel();
+            atomic.set(true);
         }
     }
 
@@ -279,8 +243,8 @@ public class RealDownLoader extends AsyncTask<Void, Integer, Integer> implements
         public void write(byte[] buffer, int offset, int count) throws IOException {
             super.write(buffer, offset, count);
             loaded += count;
+            //更新进度
             publishProgress(0);
-
         }
     }
 
@@ -294,7 +258,6 @@ public class RealDownLoader extends AsyncTask<Void, Integer, Integer> implements
         }
 
         public static String getMsgByCode(int code) {
-            LogUtils.getInstance().e(TAG, "  CODE:" + code);
             switch (code) {
                 case 400:
                     return "Network connection error";
@@ -322,15 +285,15 @@ public class RealDownLoader extends AsyncTask<Void, Integer, Integer> implements
         @Override
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
-            if ("com.agentweb.cancelled".equals(action)) {
-                String url = intent.getStringExtra("TAG");
+            if (AgentWebX5Config.NOTIFICATION_CANCEL_ACTION.equals(action)) {
+                String url = intent.getStringExtra("taskUrl");
                 Class<?> mClazz = mObservable.getClass();
                 try {
                     Method mMethod = mClazz.getMethod("setChanged", (Class<?>[]) null);
                     mMethod.setAccessible(true);
                     mMethod.invoke(mObservable, (Object[]) null);
+                    //通知观察者
                     mObservable.notifyObservers(url);
-                    LogUtils.getInstance().e(TAG, "size:" + mObservable.countObservers());
                 } catch (Exception ex) {
                     ex.printStackTrace();
                 }

@@ -5,38 +5,29 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
-import android.os.SystemClock;
 
 import androidx.core.app.NotificationCompat;
-public class Notify {
+
+/**
+ * 下载通知栏管理
+ */
+public class NotifyManager {
     private int NOTIFICATION_ID;
     private NotificationManager nm;
     private NotificationCompat.Builder cBuilder;
 
-    public Notify(Context context, int ID) {
+    public NotifyManager(Context context, int ID) {
         this.NOTIFICATION_ID = ID;
         // 获取系统服务来初始化对象
-        nm = (NotificationManager) context
-                .getSystemService(Activity.NOTIFICATION_SERVICE);
-        cBuilder = new NotificationCompat.Builder(context);
+        nm = (NotificationManager) context.getSystemService(Activity.NOTIFICATION_SERVICE);
+        cBuilder = new NotificationCompat.Builder(context, String.valueOf(NOTIFICATION_ID));
     }
 
     public void notify_progress(PendingIntent pendingIntent, int smallIcon,
-                                String ticker, String title, String content, boolean sound, boolean vibrate, boolean lights, PendingIntent pendingIntentCancel) {
-        setCompatBuilder(pendingIntent, smallIcon, ticker, title, content, sound, vibrate, lights, pendingIntentCancel);
-    }
-
-    /**
-     * 设置在顶部通知栏中的各种信息
-     *
-     * @param pendingIntent
-     * @param smallIcon
-     * @param ticker
-     * @param pendingIntentCancel
-     */
-    private void setCompatBuilder(PendingIntent pendingIntent, int smallIcon, String ticker,
-                                  String title, String content, boolean sound, boolean vibrate, boolean lights, PendingIntent pendingIntentCancel) {
-       cBuilder.setContentIntent(pendingIntent);// 该通知要启动的Intent
+                                String ticker, String title, String content,
+                                boolean sound, boolean vibrate, boolean lights,
+                                PendingIntent pendingIntentCancel) {
+        cBuilder.setContentIntent(pendingIntent);// 该通知要启动的Intent
         cBuilder.setSmallIcon(smallIcon);// 设置顶部状态栏的小图标
         cBuilder.setTicker(ticker);// 在顶部状态栏中的提示信息
         cBuilder.setContentTitle(title);// 设置通知中心的标题
@@ -76,11 +67,6 @@ public class Notify {
         cBuilder.setDefaults(defaults);
     }
 
-    public void setProgress(int maxprogress, int currentprogress, boolean exc) {
-        cBuilder.setProgress(maxprogress, currentprogress, exc);
-        sent();
-    }
-
     public void setContentText(String text) {
         cBuilder.setContentText(text);
     }
@@ -89,10 +75,21 @@ public class Notify {
         return cBuilder.build().deleteIntent != null;
     }
 
-    public void setDelecte(PendingIntent intent) {
+    public void setDelete(PendingIntent intent) {
         cBuilder.setDeleteIntent(intent);
     }
 
+    /**
+     * 更新进度
+     */
+    public void setProgress(int maxProgress, int currentProgress, boolean exc) {
+        cBuilder.setProgress(maxProgress, currentProgress, exc);
+        sent();
+    }
+
+    /**
+     * 下载完成
+     */
     public void setProgressFinish(String content, PendingIntent pendingIntent) {
         cBuilder.setContentText(content);
         cBuilder.setProgress(100, 100, false);
@@ -104,25 +101,25 @@ public class Notify {
      * 发送通知
      */
     public void sent() {
-        try {
-            Notification notification = cBuilder.build();
-            // 发送该通知
-            nm.notify(NOTIFICATION_ID, notification);
-        } catch (Throwable throwable) {
-            throwable.printStackTrace();
-        }
+        Notification notification = cBuilder.build();
+        // 发送该通知
+        nm.notify(NOTIFICATION_ID, notification);
     }
 
+    /**
+     * 取消通知
+     *
+     * @param id 通知id
+     */
+    public void cancelById(int id) {
+        nm.cancel(id);
+    }
 
     /**
-     * 根据id清除通知
+     * 取消全部通知
      */
-    public void clear() {
-        // 取消通知
+    public void cancelAll() {
         nm.cancelAll();
     }
 
-    public void cancel(int id) {
-        nm.cancel(id);
-    }
 }

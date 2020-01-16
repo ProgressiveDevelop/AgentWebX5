@@ -37,6 +37,7 @@ public class CustomIndicatorFragment extends AgentWebX5Fragment {
         CommonIndicator mCommonIndicator = new CommonIndicator(this.getActivity());
         FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(-2, -2);
         lp.gravity = Gravity.CENTER;
+        lp.setMargins(50, 50, 50, 50);
         ProgressBar mProgressBar = new ProgressBar(this.getActivity());
         mProgressBar.setBackground(this.getResources().getDrawable(R.drawable.indicator_shape));
         mCommonIndicator.addView(mProgressBar, lp);

@@ -4,4 +4,6 @@
     <string name="text_camera">相机</string>
     <string name="tip_create_file_fail">文件创建失败</string>
     <string name="tip_create_dir_fail">文件夹创建失败</string>
+    <string name="tip_start_down">开始下载,可在通知栏查看进度</string>
+    <string name="tip_completed_down">下载完成,通知栏点击查看</string>
 </resources>
