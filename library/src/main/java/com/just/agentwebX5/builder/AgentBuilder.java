@@ -6,9 +6,7 @@ import android.view.ViewGroup;
 import androidx.collection.ArrayMap;
 
 import com.just.agentwebX5.AgentWebX5;
-import com.just.agentwebX5.BaseIndicatorView;
 import com.just.agentwebX5.DefaultWebClient;
-import com.just.agentwebX5.HookManager;
 import com.just.agentwebX5.IEventHandler;
 import com.just.agentwebX5.IReceivedTitleCallback;
 import com.just.agentwebX5.IWebCreator;
@@ -20,6 +18,7 @@ import com.just.agentwebX5.SecurityType;
 import com.just.agentwebX5.WebViewClientCallbackManager;
 import com.just.agentwebX5.downFile.DownLoadResultListener;
 import com.just.agentwebX5.permission.IPermissionInterceptor;
+import com.just.agentwebX5.progress.BaseIndicatorView;
 import com.just.agentwebX5.progress.IndicatorController;
 import com.tencent.smtt.sdk.WebChromeClient;
 import com.tencent.smtt.sdk.WebView;
@@ -371,7 +370,7 @@ public class AgentBuilder {
     }
 
     public PreAgentWeb buildAgentWeb() {
-        return new PreAgentWeb(HookManager.hookAgentWeb(new AgentWebX5(this), this));
+        return new PreAgentWeb(new AgentWebX5(this));
     }
 
     private IEventHandler mIEventHandler;

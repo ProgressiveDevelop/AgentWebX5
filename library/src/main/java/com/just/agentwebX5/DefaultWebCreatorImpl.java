@@ -11,6 +11,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.just.agentwebX5.helpClass.AgentWebX5Config;
+import com.just.agentwebX5.progress.BaseIndicatorView;
 import com.just.agentwebX5.progress.IBaseProgressSpec;
 import com.just.agentwebX5.progress.WebProgress;
 import com.just.agentwebX5.util.AgentWebX5Utils;

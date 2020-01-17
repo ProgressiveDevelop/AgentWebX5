@@ -88,7 +88,6 @@ public class VideoImpl implements IVideo, IEventInterceptor {
 
     @Override
     public boolean event() {
-        LogUtils.getInstance().e(TAG, "event:" + isVideoState());
         if (isVideoState()) {
             onHideCustomView();
             return true;

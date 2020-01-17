@@ -1,6 +1,6 @@
 package com.just.agentwebX5.builder;
 
-import com.just.agentwebX5.BaseIndicatorView;
+import com.just.agentwebX5.progress.BaseIndicatorView;
 
 public class ConfigIndicatorBuilder {
     private AgentBuilder mAgentBuilder;

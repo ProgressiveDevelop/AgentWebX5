@@ -58,7 +58,6 @@ public class CommonActivity extends PermissionActivity {
 
             case 5:
                 ft.add(R.id.container_framelayout, mAgentWebX5Fragment = AgentWebX5Fragment.getInstance(mBundle = new Bundle()), AgentWebX5Fragment.class.getName());
-                mBundle.putString(AgentWebX5Fragment.URL_KEY, "https://m.youku.com/alipay_video/id_XNDUxMDg3MTMzMg==.html");
                 break;
             case 6:
                 ft.add(R.id.container_framelayout, mAgentWebX5Fragment = CustomIndicatorFragment.getInstance(mBundle = new Bundle()), AgentWebX5Fragment.class.getName());

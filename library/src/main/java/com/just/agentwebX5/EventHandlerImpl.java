@@ -2,6 +2,7 @@ package com.just.agentwebX5;
 
 import android.view.KeyEvent;
 
+import com.just.agentwebX5.util.LogUtils;
 import com.tencent.smtt.sdk.WebView;
 
 /**
@@ -24,19 +25,18 @@ public class EventHandlerImpl implements IEventHandler {
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.ACTION_DOWN) {
             return back();
+        } else {
+            return false;
         }
-        return false;
     }
 
     @Override
     public boolean back() {
         if (this.mEventInterceptor != null && this.mEventInterceptor.event()) {
+            LogUtils.getInstance().e(getClass().getSimpleName(), "webView go back");
             return true;
+        } else {
+            return false;
         }
-        if (mWebView != null && mWebView.canGoBack()) {
-            mWebView.goBack();
-            return true;
-        }
-        return false;
     }
 }

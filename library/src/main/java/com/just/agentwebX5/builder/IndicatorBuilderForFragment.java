@@ -3,7 +3,7 @@ package com.just.agentwebX5.builder;
 import androidx.annotation.ColorInt;
 import androidx.annotation.NonNull;
 
-import com.just.agentwebX5.BaseIndicatorView;
+import com.just.agentwebX5.progress.BaseIndicatorView;
 
 public class IndicatorBuilderForFragment {
     private AgentBuilderFragment agentBuilderFragment;

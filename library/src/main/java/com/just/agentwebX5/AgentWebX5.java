@@ -6,18 +6,12 @@ import android.text.TextUtils;
 import android.view.KeyEvent;
 import android.view.ViewGroup;
 
-import androidx.annotation.ColorInt;
-import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.collection.ArrayMap;
 import androidx.fragment.app.Fragment;
 
 import com.just.agentwebX5.builder.AgentBuilder;
 import com.just.agentwebX5.builder.AgentBuilderFragment;
-import com.just.agentwebX5.builder.CommonAgentBuilder;
-import com.just.agentwebX5.builder.IndicatorBuilderForFragment;
-import com.just.agentwebX5.builder.PreAgentWeb;
 import com.just.agentwebX5.downFile.DefaultDownLoaderImpl;
 import com.just.agentwebX5.downFile.DownLoadResultListener;
 import com.just.agentwebX5.helpClass.AgentWebX5Config;
@@ -28,6 +22,7 @@ import com.just.agentwebX5.js.IJsInterfaceHolder;
 import com.just.agentwebX5.js.JsAccessImpl;
 import com.just.agentwebX5.js.JsInterfaceHolderImpl;
 import com.just.agentwebX5.permission.IPermissionInterceptor;
+import com.just.agentwebX5.progress.BaseIndicatorView;
 import com.just.agentwebX5.progress.IndicatorController;
 import com.just.agentwebX5.progress.IndicatorHandlerImpl;
 import com.just.agentwebX5.uploadFile.FileUploadPopImpl;
@@ -41,7 +36,6 @@ import com.tencent.smtt.sdk.WebChromeClient;
 import com.tencent.smtt.sdk.WebView;
 import com.tencent.smtt.sdk.WebViewClient;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -427,16 +421,28 @@ public class AgentWebX5 {
      */
     public boolean onKeyDown(int keyCode, KeyEvent keyEvent) {
         if (mIEventHandler == null) {
-            mIEventHandler = EventHandlerImpl.getInstance(webCreator.get(), getEventInterceptor());
+            if (webCreator.get() != null && webCreator.get().canGoBack()) {
+                webCreator.get().goBack();
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            return mIEventHandler.onKeyDown(keyCode, keyEvent);
         }
-        return mIEventHandler.onKeyDown(keyCode, keyEvent);
     }
 
     //返回
     public boolean back() {
         if (mIEventHandler == null) {
-            mIEventHandler = EventHandlerImpl.getInstance(webCreator.get(), getEventInterceptor());
+            if (webCreator.get() != null && webCreator.get().canGoBack()) {
+                webCreator.get().goBack();
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            return mIEventHandler.back();
         }
-        return mIEventHandler.back();
     }
 }

@@ -16,7 +16,6 @@ import android.view.animation.LinearInterpolator;
 import android.widget.FrameLayout;
 
 import com.just.agentwebX5.util.AgentWebX5Utils;
-import com.just.agentwebX5.BaseIndicatorView;
 import com.just.agentwebX5.util.LogUtils;
 
 /**

@@ -1,6 +1,5 @@
 package com.webx5.controller.activity;
 
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -10,7 +9,6 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
@@ -26,7 +24,6 @@ import com.webx5.ui.view.WebLayout;
 public abstract class BaseWebActivity extends AppCompatActivity {
     protected AgentWebX5 mAgentWebX5;
     private TextView mTitleTextView;
-    private AlertDialog mAlertDialog;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -43,7 +40,7 @@ public abstract class BaseWebActivity extends AppCompatActivity {
         mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                showDialog();
+                onBackPressed();
             }
         });
 
@@ -80,30 +77,6 @@ public abstract class BaseWebActivity extends AppCompatActivity {
 
 
     public abstract String getUrl();
-
-    private void showDialog() {
-        if (mAlertDialog == null)
-            mAlertDialog = new AlertDialog.Builder(this)
-                    .setMessage("您确定要关闭该页面吗?")
-                    .setNegativeButton("再逛逛", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            if (mAlertDialog != null) {
-                                mAlertDialog.dismiss();
-                            }
-                        }
-                    })
-                    .setPositiveButton("确定", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            if (mAlertDialog != null) {
-                                mAlertDialog.dismiss();
-                            }
-                            finish();
-                        }
-                    }).create();
-        mAlertDialog.show();
-    }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
