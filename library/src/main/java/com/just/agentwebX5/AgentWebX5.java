@@ -55,7 +55,6 @@ public class AgentWebX5 {
     private boolean enableProgress;
     private ArrayMap<String, Object> mJavaObjects = new ArrayMap<>();
     private IEventHandler mIEventHandler;
-
     private IWebListenerManager mWebListenerManager;
     private IWebSecurityController<IWebSecurityCheckLogic> mWebSecurityController;
     private IWebSecurityCheckLogic mWebSecurityCheckLogic = null;
