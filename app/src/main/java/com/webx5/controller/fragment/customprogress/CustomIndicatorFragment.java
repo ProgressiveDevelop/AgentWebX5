@@ -15,6 +15,7 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 
 import com.just.agentwebX5.AgentWebX5;
+import com.just.agentwebX5.SecurityType;
 import com.just.agentwebX5.WebDefaultSettingsImpl;
 import com.webx5.R;
 import com.webx5.controller.fragment.AgentWebX5Fragment;
@@ -48,7 +49,7 @@ public class CustomIndicatorFragment extends AgentWebX5Fragment {
                 .setWebSettings(WebDefaultSettingsImpl.getInstance())//
                 .setWebViewClient(mWebViewClient)
                 .setReceivedTitleCallback(mCallback)
-                .setSecurityType(AgentWebX5.SecurityType.strict)
+                .setSecurityType(SecurityType.strict)
                 .createAgentWeb()//
                 .ready()//
                 .go(getUrl());

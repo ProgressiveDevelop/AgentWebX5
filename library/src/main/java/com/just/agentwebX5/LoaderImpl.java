@@ -18,9 +18,6 @@ public class LoaderImpl implements ILoader {
     private Map<String, String> headers;
 
     LoaderImpl(WebView webView, Map<String, String> map) {
-        if (webView == null) {
-            throw new NullPointerException("WebView is null");
-        }
         this.mWebView = webView;
         this.headers = map;
         mHandler = new Handler(Looper.getMainLooper());

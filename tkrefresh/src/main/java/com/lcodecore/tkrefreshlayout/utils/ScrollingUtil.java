@@ -90,7 +90,7 @@ public class ScrollingUtil {
         if (view instanceof AbsListView) return isAbsListViewToTop((AbsListView) view);
         if (view instanceof RecyclerView) return isRecyclerViewToTop((RecyclerView) view);
         if (view instanceof com.tencent.smtt.sdk.WebView)
-            return (view != null && Math.abs(((com.tencent.smtt.sdk.WebView) view).getWebScrollY()) <= 2 * mTouchSlop);
+            return Math.abs(((com.tencent.smtt.sdk.WebView) view).getWebScrollY()) <= 2 * mTouchSlop;
         return (view != null && Math.abs(view.getScrollY()) <= 2 * mTouchSlop);
     }
 
@@ -106,7 +106,7 @@ public class ScrollingUtil {
 
     public static boolean isX5WebViewToBottom(com.tencent.smtt.sdk.WebView webview, int mTouchSlop) {
         LogUtil.i("webview.getContentHeight() :" + webview.getContentHeight() + "  getScale:" + webview.getScale() + "  getHeight:" + webview.getHeight() + "  webview.getScrollY:" + webview.getScrollY() + "   mTouchSlop:" + mTouchSlop + "   (webview.getContentHeight() * webview.getScale() - (webview.getHeight() + webview.getScrollY())):" + (webview.getContentHeight() * webview.getScale() - (webview.getHeight() + webview.getScrollY())) + "   2 * mTouchSlop:" + (2 * mTouchSlop) + "   getY:" + webview.getY() + "  getWebScrollY:" + webview.getWebScrollY() + "   getPivotY :" + webview.getPivotY() + "    getTranslationY:" + webview.getTranslationY());
-        return webview != null && ((webview.getContentHeight() * webview.getScale() - (webview.getHeight() + webview.getWebScrollY())) <= 2 * mTouchSlop);
+        return webview.getContentHeight() * webview.getScale() - (webview.getHeight() + webview.getWebScrollY()) <= 2 * mTouchSlop;
     }
 
     public static boolean isAbsListViewToTop(AbsListView absListView) {
@@ -241,7 +241,6 @@ public class ScrollingUtil {
                 }
             } else if (manager instanceof StaggeredGridLayoutManager) {
                 StaggeredGridLayoutManager layoutManager = (StaggeredGridLayoutManager) manager;
-
                 int[] out = layoutManager.findLastCompletelyVisibleItemPositions(null);
                 int lastPosition = layoutManager.getItemCount() - 1;
                 for (int position : out) {

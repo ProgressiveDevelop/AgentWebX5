@@ -5,7 +5,6 @@ import com.tencent.smtt.sdk.WebView;
 
 
 /**
- * Created by cenxiaozhong on 2017/6/3.
  * source code  https://github.com/Justson/AgentWebX5
  */
 
@@ -22,8 +21,6 @@ public class DefaultWebLifeCycleImpl implements IWebLifeCycle {
             this.mWebView.onResume();
             this.mWebView.resumeTimers();
         }
-
-
     }
 
     @Override

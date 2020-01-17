@@ -17,6 +17,7 @@ import androidx.appcompat.widget.Toolbar;
 import com.just.agentwebX5.AgentWebX5;
 import com.just.agentwebX5.DefaultWebClient;
 import com.just.agentwebX5.IReceivedTitleCallback;
+import com.just.agentwebX5.SecurityType;
 import com.just.agentwebX5.util.LogUtils;
 import com.tencent.smtt.sdk.WebView;
 import com.webx5.R;
@@ -67,7 +68,8 @@ public abstract class BaseWebActivity extends AppCompatActivity {
 //                .setWebViewClient(mWebViewClient)
                 .setOpenOtherPageWays(DefaultWebClient.OpenOtherPageWays.ASK)
                 .interceptUnkownScheme()
-                .setSecutityType(AgentWebX5.SecurityType.strict)
+                .setSecutityType(SecurityType.strict)
+                //反弹布局
                 .setWebLayout(new WebLayout(this))
                 .createAgentWeb()
                 .ready()
@@ -112,7 +114,7 @@ public abstract class BaseWebActivity extends AppCompatActivity {
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        return mAgentWebX5.handleKeyEvent(keyCode, event);
+        return mAgentWebX5.onKeyDown(keyCode, event);
     }
 
     @Override

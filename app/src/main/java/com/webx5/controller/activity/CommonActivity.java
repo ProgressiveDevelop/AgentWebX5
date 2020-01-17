@@ -6,7 +6,6 @@ import android.os.Bundle;
 import android.view.KeyEvent;
 
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
@@ -86,7 +85,6 @@ public class CommonActivity extends PermissionActivity {
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        AgentWebX5Fragment mAgentWebX5Fragment = this.mAgentWebX5Fragment;
         if (mAgentWebX5Fragment != null) {
             if (((FragmentKeyDown) mAgentWebX5Fragment).onFragmentKeyDown(keyCode, event))
                 return true;

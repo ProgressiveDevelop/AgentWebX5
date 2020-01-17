@@ -21,8 +21,11 @@ import androidx.fragment.app.Fragment;
 
 import com.just.agentwebX5.AgentWebX5;
 import com.just.agentwebX5.DefaultWebClient;
+import com.just.agentwebX5.IEventHandler;
 import com.just.agentwebX5.IReceivedTitleCallback;
+import com.just.agentwebX5.IWebLayout;
 import com.just.agentwebX5.IWebSettings;
+import com.just.agentwebX5.SecurityType;
 import com.just.agentwebX5.WebDefaultSettingsImpl;
 import com.just.agentwebX5.downFile.DownLoadResultListener;
 import com.just.agentwebX5.util.LogUtils;
@@ -32,6 +35,7 @@ import com.tencent.smtt.sdk.WebView;
 import com.tencent.smtt.sdk.WebViewClient;
 import com.webx5.FragmentKeyDown;
 import com.webx5.R;
+import com.webx5.ui.view.WebLayout;
 
 import java.util.HashMap;
 import java.util.Objects;
@@ -76,7 +80,7 @@ public class AgentWebX5Fragment extends Fragment implements FragmentKeyDown {
         //初始化 AgentWebX5
         mAgentWebX5 = AgentWebX5.with(this)//
                 //设置父布局
-                .setAgentWebParent((LinearLayout) view, new LinearLayout.LayoutParams(-1, -1))//
+                .setAgentWebParent((LinearLayout) view, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT))//
                 //设置指示器颜色和高度
                 .setIndicatorColorWithHeight(-1, 2)//
                 //设置WebSetting
@@ -91,9 +95,10 @@ public class AgentWebX5Fragment extends Fragment implements FragmentKeyDown {
                 .setNotifyIcon(R.mipmap.download)
                 //打开其他页面方式
                 .setOpenOtherPageWays(DefaultWebClient.OpenOtherPageWays.ASK)
+                //.setWebLayout(new WebLayout(getActivity()))
                 .interceptUnkownScheme()
                 .openParallelDownload()
-                .setSecurityType(AgentWebX5.SecurityType.strict)
+                .setSecurityType(SecurityType.strict)
                 .addDownLoadResultListener(mDownLoadResultListener)
                 .createAgentWeb()//
                 .ready()//
@@ -127,7 +132,7 @@ public class AgentWebX5Fragment extends Fragment implements FragmentKeyDown {
     /**
      * 下载结果监听
      */
-    private DownLoadResultListener mDownLoadResultListener = new DownLoadResultListener() {
+    protected DownLoadResultListener mDownLoadResultListener = new DownLoadResultListener() {
         @Override
         public void success(String path) {
             LogUtils.getInstance().e(TAG, "path:" + path);
@@ -139,7 +144,7 @@ public class AgentWebX5Fragment extends Fragment implements FragmentKeyDown {
         }
     };
 
-    public IWebSettings getSettings() {
+    protected IWebSettings getSettings() {
         return WebDefaultSettingsImpl.getInstance();
     }
 
@@ -150,7 +155,7 @@ public class AgentWebX5Fragment extends Fragment implements FragmentKeyDown {
 //            super.onProgressChanged(view, newProgress);
 //        }
 //    };
-    public WebViewClient mWebViewClient = new WebViewClient() {
+    protected WebViewClient mWebViewClient = new WebViewClient() {
         @Override
         public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
             super.onReceivedError(view, request, error);
@@ -182,7 +187,7 @@ public class AgentWebX5Fragment extends Fragment implements FragmentKeyDown {
         }
     };
 
-    public void initView(View view) {
+    protected void initView(View view) {
         mBackImageView = view.findViewById(iv_back);
         mBackImageView.setOnClickListener(mOnClickListener);
 
@@ -241,7 +246,7 @@ public class AgentWebX5Fragment extends Fragment implements FragmentKeyDown {
      */
     @Override
     public boolean onFragmentKeyDown(int keyCode, KeyEvent event) {
-        return mAgentWebX5.handleKeyEvent(keyCode, event);
+        return mAgentWebX5.onKeyDown(keyCode, event);
     }
 
     /**

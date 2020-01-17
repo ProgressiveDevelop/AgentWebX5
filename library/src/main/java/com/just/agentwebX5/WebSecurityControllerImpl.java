@@ -13,9 +13,9 @@ public class WebSecurityControllerImpl implements IWebSecurityController<IWebSec
 
     private WebView mWebView;
     private ArrayMap<String, Object> mMap;
-    private AgentWebX5.SecurityType mSecurityType;
+    private SecurityType mSecurityType;
 
-    public WebSecurityControllerImpl(WebView view, ArrayMap<String, Object> map, AgentWebX5.SecurityType securityType) {
+    public WebSecurityControllerImpl(WebView view, ArrayMap<String, Object> map,SecurityType securityType) {
         this.mWebView = view;
         this.mMap = map;
         this.mSecurityType = securityType;
@@ -24,7 +24,7 @@ public class WebSecurityControllerImpl implements IWebSecurityController<IWebSec
     @Override
     public void check(IWebSecurityCheckLogic webSecurityCheckLogic) {
         webSecurityCheckLogic.dealHoneyComb(mWebView);
-        if (mMap != null && mSecurityType == AgentWebX5.SecurityType.strict && !mMap.isEmpty()) {
+        if (mMap != null && mSecurityType ==SecurityType.strict && !mMap.isEmpty()) {
             webSecurityCheckLogic.dealJsInterface(mMap, mSecurityType);
         }
     }

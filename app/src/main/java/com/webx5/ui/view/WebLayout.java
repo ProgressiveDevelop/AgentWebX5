@@ -13,13 +13,8 @@ import com.lcodecore.tkrefreshlayout.TwinklingRefreshLayout;
 import com.tencent.smtt.sdk.WebView;
 import com.webx5.R;
 
-/**
- * Created by cenxiaozhong on 2017/7/1.
- */
-
 public class WebLayout implements IWebLayout {
-
-    private final TwinklingRefreshLayout mTwinklingRefreshLayout;
+    private TwinklingRefreshLayout mTwinklingRefreshLayout;
     private WebView mWebView;
 
     public WebLayout(Activity activity) {

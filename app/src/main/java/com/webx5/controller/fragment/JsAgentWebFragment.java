@@ -2,16 +2,13 @@ package com.webx5.controller.fragment;
 
 import android.os.Build;
 import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.LinearLayout;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
-
-import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.LinearLayout;
 
 import com.just.agentwebX5.util.LogUtils;
 import com.tencent.smtt.sdk.ValueCallback;
@@ -31,12 +28,6 @@ public class JsAgentWebFragment extends AgentWebX5Fragment {
         if (bundle != null)
             mJsAgentWebFragment.setArguments(bundle);
         return mJsAgentWebFragment;
-    }
-
-    @Nullable
-    @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        return super.onCreateView(inflater, container, savedInstanceState);
     }
 
     @Override

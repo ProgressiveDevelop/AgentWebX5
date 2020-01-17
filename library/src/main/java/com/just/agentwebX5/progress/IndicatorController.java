@@ -1,7 +1,6 @@
 package com.just.agentwebX5.progress;
 
 
-import com.just.agentwebX5.progress.IBaseProgressSpec;
 import com.tencent.smtt.sdk.WebView;
 
 /**

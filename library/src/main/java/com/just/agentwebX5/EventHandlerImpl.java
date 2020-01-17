@@ -22,7 +22,7 @@ public class EventHandlerImpl implements IEventHandler {
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if (keyCode == KeyEvent.KEYCODE_BACK) {
+        if (keyCode == KeyEvent.ACTION_DOWN) {
             return back();
         }
         return false;

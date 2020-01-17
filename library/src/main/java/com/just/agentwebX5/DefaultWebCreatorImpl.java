@@ -29,32 +29,11 @@ public class DefaultWebCreatorImpl implements IWebCreator {
     private ViewGroup.LayoutParams mLayoutParams;
     private int color = -1;
     private int height_dp;
-
     private boolean isCreated = false;
     private IWebLayout mIWebLayout;
     private IBaseProgressSpec mBaseProgressSpec;
-
     private WebView mWebView;
-
-    public void setWebView(WebView webView) {
-        mWebView = webView;
-    }
-
     private FrameLayout mFrameLayout = null;
-
-    public void setFrameLayout(FrameLayout frameLayout) {
-        mFrameLayout = frameLayout;
-    }
-
-    private View targetProgress;
-
-    public View getTargetProgress() {
-        return targetProgress;
-    }
-
-    public void setTargetProgress(View targetProgress) {
-        this.targetProgress = targetProgress;
-    }
 
     protected DefaultWebCreatorImpl(@NonNull Activity activity, @Nullable ViewGroup viewGroup, ViewGroup.LayoutParams lp, int index, int color, int height_dp, WebView webView, IWebLayout webLayout) {
         this.mActivity = activity;
@@ -96,7 +75,6 @@ public class DefaultWebCreatorImpl implements IWebCreator {
             return this;
         }
         isCreated = true;
-        ViewGroup mViewGroup = this.mViewGroup;
         if (mViewGroup == null) {
             mViewGroup = createGroupWithWeb();
             mActivity.setContentView(mViewGroup);
@@ -112,11 +90,8 @@ public class DefaultWebCreatorImpl implements IWebCreator {
 
     /**
      * 创建布局容器
-     *
-     * @return
      */
     private ViewGroup createGroupWithWeb() {
-        Activity mActivity = this.mActivity;
         FrameLayout mFrameLayout = new FrameLayout(mActivity);
         mFrameLayout.setBackgroundColor(Color.WHITE);
         View target = mIWebLayout == null ? (this.mWebView = web()) : webLayout();
@@ -160,14 +135,13 @@ public class DefaultWebCreatorImpl implements IWebCreator {
      * @return view
      */
     private View webLayout() {
-        WebView mWebView = mIWebLayout.getWeb();
+        mWebView = mIWebLayout.getWeb();
         if (mWebView == null) {
             mWebView = web();
             //添加WebView
             mIWebLayout.getLayout().addView(mWebView, -1, -1);
             LogUtils.getInstance().e(getClass().getSimpleName(), "add web view");
         }
-        this.mWebView = mWebView;
         return mIWebLayout.getLayout();
     }
 
@@ -177,9 +151,7 @@ public class DefaultWebCreatorImpl implements IWebCreator {
      * @return WebView
      */
     private WebView web() {
-        WebView mWebView;
-        if (this.mWebView != null) {
-            mWebView = this.mWebView;
+        if (mWebView != null) {
             AgentWebX5Config.WEBVIEW_TYPE = AgentWebX5Config.WEBVIEW_CUSTOM_TYPE;
         } else {
             mWebView = new WebView(mActivity);

@@ -28,7 +28,7 @@ public class MiddleWareWebClientBase extends WrapperWebViewClient {
 
     }
 
-    MiddleWareWebClientBase enq(MiddleWareWebClientBase middleWrareWebClientBase) {
+    public MiddleWareWebClientBase enq(MiddleWareWebClientBase middleWrareWebClientBase) {
         setWebViewClient(middleWrareWebClientBase);
         this.mMiddleWrareWebClientBase = middleWrareWebClientBase;
         return middleWrareWebClientBase;
