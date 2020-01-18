@@ -10,7 +10,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 
-import com.just.agentwebX5.util.LogUtils;
+import com.just.x5.util.LogUtils;
 import com.tencent.smtt.sdk.ValueCallback;
 import com.webx5.AndroidInterface;
 import com.webx5.R;
@@ -22,13 +22,6 @@ import org.json.JSONObject;
  */
 
 public class JsAgentWebFragment extends AgentWebX5Fragment {
-
-    public static JsAgentWebFragment getInstance(Bundle bundle) {
-        JsAgentWebFragment mJsAgentWebFragment = new JsAgentWebFragment();
-        if (bundle != null)
-            mJsAgentWebFragment.setArguments(bundle);
-        return mJsAgentWebFragment;
-    }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {

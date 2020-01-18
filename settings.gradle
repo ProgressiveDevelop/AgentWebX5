@@ -1,1 +1,1 @@
-include ':app', ':library', ':tkrefresh'
+include ':app', ':x5Kit', ':tkrefresh'

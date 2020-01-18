@@ -7,7 +7,7 @@ import android.widget.FrameLayout;
 
 import androidx.annotation.Nullable;
 
-import com.just.agentwebX5.progress.BaseIndicatorView;
+import com.just.x5.progress.BaseIndicatorView;
 
 
 public class CommonIndicator extends BaseIndicatorView {

@@ -1,8 +1,8 @@
 package com.webx5.controller.fragment.customsetting;
 
 
-import com.just.agentwebX5.WebDefaultSettingsImpl;
-import com.just.agentwebX5.IWebSettings;
+import com.just.x5.WebDefaultSettingsImpl;
+import com.just.x5.IWebSettings;
 import com.tencent.smtt.sdk.WebView;
 
 /**

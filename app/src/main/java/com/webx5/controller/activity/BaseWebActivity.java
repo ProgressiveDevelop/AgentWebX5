@@ -12,11 +12,11 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
-import com.just.agentwebX5.AgentWebX5;
-import com.just.agentwebX5.DefaultWebClient;
-import com.just.agentwebX5.IReceivedTitleCallback;
-import com.just.agentwebX5.SecurityType;
-import com.just.agentwebX5.util.LogUtils;
+import com.just.x5.AgentWebX5;
+import com.just.x5.DefaultWebClient;
+import com.just.x5.IReceivedTitleCallback;
+import com.just.x5.SecurityType;
+import com.just.x5.util.LogUtils;
 import com.tencent.smtt.sdk.WebView;
 import com.webx5.R;
 import com.webx5.ui.view.WebLayout;

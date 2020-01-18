@@ -2,11 +2,6 @@ package com.webx5.controller.fragment.customprogress;
 
 import android.os.Build;
 import android.os.Bundle;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.annotation.RequiresApi;
-
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,9 +9,13 @@ import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 
-import com.just.agentwebX5.AgentWebX5;
-import com.just.agentwebX5.SecurityType;
-import com.just.agentwebX5.WebDefaultSettingsImpl;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
+
+import com.just.x5.AgentWebX5;
+import com.just.x5.SecurityType;
+import com.just.x5.WebDefaultSettingsImpl;
 import com.webx5.R;
 import com.webx5.controller.fragment.AgentWebX5Fragment;
 
@@ -24,12 +23,6 @@ import com.webx5.controller.fragment.AgentWebX5Fragment;
  * 自定义进度条演示
  */
 public class CustomIndicatorFragment extends AgentWebX5Fragment {
-    public static CustomIndicatorFragment getInstance(Bundle bundle) {
-        CustomIndicatorFragment mCustomIndicatorFragment = new CustomIndicatorFragment();
-        if (bundle != null)
-            mCustomIndicatorFragment.setArguments(bundle);
-        return mCustomIndicatorFragment;
-    }
 
     @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
     @Override

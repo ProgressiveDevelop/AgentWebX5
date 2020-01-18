@@ -19,25 +19,22 @@ import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.fragment.app.Fragment;
 
-import com.just.agentwebX5.AgentWebX5;
-import com.just.agentwebX5.DefaultWebClient;
-import com.just.agentwebX5.IEventHandler;
-import com.just.agentwebX5.IReceivedTitleCallback;
-import com.just.agentwebX5.IWebLayout;
-import com.just.agentwebX5.IWebSettings;
-import com.just.agentwebX5.SecurityType;
-import com.just.agentwebX5.WebDefaultSettingsImpl;
-import com.just.agentwebX5.downFile.DownLoadResultListener;
-import com.just.agentwebX5.util.LogUtils;
+import com.just.x5.AgentWebX5;
+import com.just.x5.DefaultWebClient;
+import com.just.x5.IReceivedTitleCallback;
+import com.just.x5.IWebSettings;
+import com.just.x5.SecurityType;
+import com.just.x5.WebDefaultSettingsImpl;
+import com.just.x5.downFile.DownLoadResultListener;
+import com.just.x5.util.LogUtils;
 import com.tencent.smtt.export.external.interfaces.WebResourceError;
 import com.tencent.smtt.export.external.interfaces.WebResourceRequest;
 import com.tencent.smtt.sdk.WebView;
 import com.tencent.smtt.sdk.WebViewClient;
 import com.webx5.FragmentKeyDown;
+import com.webx5.KeyCanstans;
 import com.webx5.R;
-import com.webx5.ui.view.WebLayout;
 
-import java.util.HashMap;
 import java.util.Objects;
 
 import static com.webx5.R.id.iv_back;
@@ -52,20 +49,7 @@ public class AgentWebX5Fragment extends Fragment implements FragmentKeyDown {
     private View mLineView;
     private TextView mTitleTextView;
     protected AgentWebX5 mAgentWebX5;
-    public static final String URL_KEY = "url_key";
     private static final String TAG = AgentWebX5Fragment.class.getSimpleName();
-
-    /**
-     * 获取实例
-     *
-     * @param bundle 参数存储Bundle
-     * @return AgentWebX5Fragment
-     */
-    public static AgentWebX5Fragment getInstance(Bundle bundle) {
-        AgentWebX5Fragment mAgentWebX5Fragment = new AgentWebX5Fragment();
-        mAgentWebX5Fragment.setArguments(bundle);
-        return mAgentWebX5Fragment;
-    }
 
     @Nullable
     @Override
@@ -111,9 +95,9 @@ public class AgentWebX5Fragment extends Fragment implements FragmentKeyDown {
      *
      * @return 网页路径
      */
-    public String getUrl() {
+    protected String getUrl() {
         String target;
-        if (TextUtils.isEmpty(target = this.getArguments() != null ? this.getArguments().getString(URL_KEY) : null)) {
+        if (TextUtils.isEmpty(target = this.getArguments() != null ? this.getArguments().getString(KeyCanstans.KEY_URL) : null)) {
             target = "https://parse.xymov.net/";
         }
         return target;

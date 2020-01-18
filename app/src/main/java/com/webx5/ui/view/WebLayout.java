@@ -8,7 +8,7 @@ import androidx.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
-import com.just.agentwebX5.IWebLayout;
+import com.just.x5.IWebLayout;
 import com.lcodecore.tkrefreshlayout.TwinklingRefreshLayout;
 import com.tencent.smtt.sdk.WebView;
 import com.webx5.R;

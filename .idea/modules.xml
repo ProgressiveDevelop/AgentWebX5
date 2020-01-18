@@ -4,8 +4,8 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/AgentWebX5.iml" filepath="$PROJECT_DIR$/AgentWebX5.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
-      <module fileurl="file://$PROJECT_DIR$/library/library.iml" filepath="$PROJECT_DIR$/library/library.iml" />
       <module fileurl="file://$PROJECT_DIR$/tkrefresh/tkrefresh.iml" filepath="$PROJECT_DIR$/tkrefresh/tkrefresh.iml" />
+      <module fileurl="file://$PROJECT_DIR$/x5Kit/x5Kit.iml" filepath="$PROJECT_DIR$/x5Kit/x5Kit.iml" />
     </modules>
   </component>
 </project>

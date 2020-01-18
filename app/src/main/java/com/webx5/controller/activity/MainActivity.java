@@ -24,7 +24,7 @@ import com.webx5.R;
 
 public class MainActivity extends AppCompatActivity {
 
-    public static final String[] datas = new String[]{"Activity使用AgentWebX5(反弹效果:音乐)", "Fragment 使用 AgentWebX5 ", "文件下载", "input标签文件上传", "Js 通信文件上传,兼用Android 4.4Kitkat", "Js 通信", "Video 视屏全屏播放", "自定义进度条", "自定义设置", "电话 ， 信息 ， 邮件"};
+    public String[] datas = new String[]{"Activity使用AgentWebX5(反弹效果:音乐)", "Fragment 使用 AgentWebX5 ", "文件下载", "input标签文件上传", "Js 通信文件上传,兼用Android 4.4Kitkat", "Js 通信", "Video 视屏全屏播放", "自定义进度条", "自定义设置", "电话 ， 信息 ， 邮件"};
     private String TYPE_KEY;
 
     @SuppressLint("SetTextI18n")

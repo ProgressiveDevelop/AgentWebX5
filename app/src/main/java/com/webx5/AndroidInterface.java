@@ -3,12 +3,11 @@ package com.webx5;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
-import android.util.Log;
 import android.webkit.JavascriptInterface;
 import android.widget.Toast;
 
-import com.just.agentwebX5.AgentWebX5;
-import com.just.agentwebX5.util.LogUtils;
+import com.just.x5.AgentWebX5;
+import com.just.x5.util.LogUtils;
 
 
 public class AndroidInterface {

@@ -2,7 +2,7 @@ package com.webx5.config;
 
 import android.app.Application;
 
-import com.just.agentwebX5.util.LogUtils;
+import com.just.x5.util.LogUtils;
 import com.squareup.leakcanary.LeakCanary;
 import com.tencent.smtt.sdk.QbSdk;
 
